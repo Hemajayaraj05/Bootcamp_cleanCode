@@ -1,51 +1,25 @@
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.io.IOException;
 
 public class CustomerBillData {
 
     public static void main(String[] args)
     {
 
-   String inputData = "{\r\n" +
-"    \"name\": \"Sabareesan\",\r\n" +
-"    \"dob\": \"1980-12-21\",\r\n" +
-"    \"bills\": [\r\n" +
-"        {\r\n" +
-"            \"date\": \"2022-12-03T05:34:57.660Z\",\r\n" +
-"            \"products\": [\r\n" +
-"                {\r\n" +
-"                    \"skuCode\": \"a\",\r\n" +
-"                    \"price\": 100,\r\n" +
-"                    \"quantity\": 2,\r\n" +
-"                    \"taxAmt\": 20\r\n" +
-"                },\r\n" +
-"                {\r\n" +
-"                    \"skuCode\": \"b\",\r\n" +
-"                    \"price\": 200,\r\n" +
-"                    \"quantity\": 3,\r\n" +
-"                    \"taxAmt\": 0\r\n" +
-"                }\r\n" +
-"            ],\r\n" +
-"            \"discount\": \"10%\"\r\n" +
-"        },\r\n" +
-"        {\r\n" +
-"            \"date\": \"2023-08-03T05:34:57.660Z\",\r\n" +
-"            \"products\": [\r\n" +
-"                {\r\n" +
-"                    \"skuCode\": \"c\",\r\n" +
-"                    \"price\": 80,\r\n" +    
-"                    \"quantity\": 1,\r\n" +
-"                    \"taxAmt\": 20\r\n" +
-"                }\r\n" +
-"            ],\r\n" +
-"            \"discount\": \"0%\"\r\n" +
-"        }\r\n" +
-"    ]\r\n" +
-"}";
+        String JSONFilePath="bill.json";
+        String inputData="";
+        try{
+            inputData=new String(Files.readAllBytes(Paths.get(JSONFilePath)));
+        }catch(IOException e)
+        {
+            return ;
+        }
 
          JSONObject obj=new JSONObject(inputData);
          int age=calculateAge(obj.getString("dob"));
@@ -58,10 +32,8 @@ public class CustomerBillData {
          int lifeTimeValue=calculateLifeTimeValue(obj.getJSONArray("bills"));
          obj.put("ltv",lifeTimeValue);
          System.out.println(lifeTimeValue);
-         
-       isBoughtForBirthDay(obj.getJSONArray("bills"),obj.getString("dob"));
-   
-         System.out.println(obj);
+         isBoughtForBirthDay(obj.getJSONArray("bills"),obj.getString("dob"));
+          System.out.println(obj);
 
 }
 
@@ -114,11 +86,15 @@ public static int calculateAge(String Dob)
             for(int j=0;j<productArray.length();j++)
             {
                 JSONObject productObj=productArray.getJSONObject(j);
-                 netAmount=netAmount+(productObj.getInt("price")*productObj.getInt("quantity"))+productObj.getInt("taxAmt");
+                 netAmount=netAmount+calculateNetAmount(productObj.getInt("price"),productObj.getInt("quantity"),productObj.getInt("taxAmt"));
             }
             billObj.put("grossTotal",netAmount);
         }
 
+    }
+    public static int calculateNetAmount(int price,int quantity,int taxAmt)
+    {
+        return (price*quantity)+taxAmt;
     }
 
     public static void calculatePaidAmount(JSONArray bills)
@@ -130,7 +106,7 @@ public static int calculateAge(String Dob)
             for(int j=0;j<productArray.length();j++)
             {
                 JSONObject productObj=productArray.getJSONObject(j);
-                 int netAmount=(productObj.getInt("price")*productObj.getInt("quantity"))+productObj.getInt("taxAmt");
+                 int netAmount=calculateNetAmount(productObj.getInt("price"),productObj.getInt("quantity"),productObj.getInt("taxAmt"));
                  int discount=Integer.parseInt(billObj.getString("discount").replaceAll("%", ""));
                  int paidAmount=netAmount-(discount*(productObj.getInt("price")*productObj.getInt("quantity"))/100);
                  productObj.put("paidAmount",paidAmount);
