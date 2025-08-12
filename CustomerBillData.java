@@ -30,9 +30,9 @@ public class CustomerBillData {
          String lastBillDate=getLastBillDate(obj.getJSONArray("bills"));
          obj.put("lastBillDate",lastBillDate); 
 
-         calculateGrossAmount(bills);
-         calculatePaidAmount(bills);
-         payableAmount(bills);
+         processBills(bills);
+
+        
 
          int lifeTimeValue=calculateLifeTimeValue(bills);
          obj.put("ltv",lifeTimeValue);
@@ -48,7 +48,20 @@ public class CustomerBillData {
         
 
 }
+public static void processBills(JSONArray bills)
+{
+    for(int i=0;i<bills.length();i++)
+    {
+        JSONObject bill=bills.getJSONObject(i);
+        int grossTotal= calculateGrossAmount(bill);
+        calculatePaidAmount(bill);
+        bill.put("payableAmt",sumPayableAmt(bill));
+        bill.put("grossTotal",grossTotal);
+    }
+     
+        
 
+}
 public static int calculateAge(String Dob,JSONArray bills)
     {
         String[] parsedDob=Dob.split("-");
@@ -89,19 +102,18 @@ public static int calculateAge(String Dob,JSONArray bills)
     }
 
 
-    public static void  calculateGrossAmount(JSONArray bills){
-        for(int i=0;i<bills.length();i++)
-        {
+    public static int  calculateGrossAmount(JSONObject bill){
+       
             int netAmount=0;
-            JSONObject billObj=bills.getJSONObject(i);
-            JSONArray productArray=billObj.getJSONArray("products");
+            
+            JSONArray productArray=bill.getJSONArray("products");
             for(int j=0;j<productArray.length();j++)
             {
                 JSONObject productObj=productArray.getJSONObject(j);
                  netAmount=netAmount+calculateNetAmount(productObj.getInt("price"),productObj.getInt("quantity"),productObj.getInt("taxAmt"));
             }
-            billObj.put("grossTotal",netAmount);
-        }
+           return netAmount;
+        
 
     }
     public static int calculateNetAmount(int price,int quantity,int taxAmt)
@@ -109,41 +121,37 @@ public static int calculateAge(String Dob,JSONArray bills)
         return (price*quantity)+taxAmt;
     }
 
-    public static void calculatePaidAmount(JSONArray bills)
+    public static void calculatePaidAmount(JSONObject bill)
     {
-         for(int i=0;i<bills.length();i++)
-        {
-            JSONObject billObj=bills.getJSONObject(i);
-            JSONArray productArray=billObj.getJSONArray("products");
+        
+            JSONArray productArray=bill.getJSONArray("products");
             for(int j=0;j<productArray.length();j++)
             {
                 JSONObject productObj=productArray.getJSONObject(j);
                  int netAmount=calculateNetAmount(productObj.getInt("price"),productObj.getInt("quantity"),productObj.getInt("taxAmt"));
-                 int discount=Integer.parseInt(billObj.getString("discount").replaceAll("%", ""));
+                 int discount=Integer.parseInt(bill.getString("discount").replaceAll("%", ""));
                  int paidAmount=netAmount-(discount*(productObj.getInt("price")*productObj.getInt("quantity"))/100);
                  productObj.put("paidAmount",paidAmount);
 
             }
            
-        }
+        
 
     }
 
 
-    public static void payableAmount(JSONArray bills)
+    public static int sumPayableAmt(JSONObject bill)
     {
-        for(int i=0;i<bills.length();i++)
-        {
-            JSONObject billObj=bills.getJSONObject(i);
-            int netAmount=0;
-            JSONArray productArray=billObj.getJSONArray("products");
+    
+            int total=0;
+            JSONArray productArray=bill.getJSONArray("products");
             for(int j=0;j<productArray.length();j++)
             {
                 JSONObject productObj=productArray.getJSONObject(j);
-                netAmount=netAmount+productObj.getInt("paidAmount");
+                total=total+productObj.getInt("paidAmount");
             }
-            billObj.put("payableAmt",netAmount);
-        }
+            return total;
+        
     }
 
 
