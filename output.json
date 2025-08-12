@@ -1,0 +1,46 @@
+{
+  "dob": "1980-12-21",
+  "name": "Sabareesan",
+  "lastBillDate": "2023-08-03T05:34:57.660Z",
+  "bills": [
+    {
+      "date": "2022-12-03T05:34:57.660Z",
+      "payableAmt": 740,
+      "grossTotal": 820,
+      "discount": "10%",
+      "boughtForBirthDay": true,
+      "products": [
+        {
+          "quantity": 2,
+          "price": 100,
+          "taxAmt": 20,
+          "paidAmount": 200,
+          "skuCode": "a"
+        },
+        {
+          "quantity": 3,
+          "price": 200,
+          "taxAmt": 0,
+          "paidAmount": 540,
+          "skuCode": "b"
+        }
+      ]
+    },
+    {
+      "date": "2023-08-03T05:34:57.660Z",
+      "payableAmt": 100,
+      "grossTotal": 100,
+      "discount": "0%",
+      "boughtForBirthDay": false,
+      "products": [{
+        "quantity": 1,
+        "price": 80,
+        "taxAmt": 20,
+        "paidAmount": 100,
+        "skuCode": "c"
+      }]
+    }
+  ],
+  "age": 44,
+  "ltv": 840
+}

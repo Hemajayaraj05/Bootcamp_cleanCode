@@ -22,22 +22,34 @@ public class CustomerBillData {
         }
 
          JSONObject obj=new JSONObject(inputData);
-         int age=calculateAge(obj.getString("dob"));
+         JSONArray bills=obj.getJSONArray("bills");
+
+         int age=calculateAge(obj.getString("dob"),bills);
          obj.put("age",age);
+
          String lastBillDate=getLastBillDate(obj.getJSONArray("bills"));
-         System.out.println(lastBillDate);
-         calculateGrossAmount(obj.getJSONArray("bills"));
-         calculatePaidAmount(obj.getJSONArray("bills"));
-         payableAmount(obj.getJSONArray("bills"));
-         int lifeTimeValue=calculateLifeTimeValue(obj.getJSONArray("bills"));
+         obj.put("lastBillDate",lastBillDate); 
+
+         calculateGrossAmount(bills);
+         calculatePaidAmount(bills);
+         payableAmount(bills);
+
+         int lifeTimeValue=calculateLifeTimeValue(bills);
          obj.put("ltv",lifeTimeValue);
-         System.out.println(lifeTimeValue);
+        
          isBoughtForBirthDay(obj.getJSONArray("bills"),obj.getString("dob"));
-          System.out.println(obj);
+
+         String outputFilePath = "output.json";
+        try{
+            Files.write(Paths.get(outputFilePath),obj.toString(2).getBytes());
+        }catch(IOException e){
+            System.err.println("Failed to write output file: " + e.getMessage());
+        }
+        
 
 }
 
-public static int calculateAge(String Dob)
+public static int calculateAge(String Dob,JSONArray bills)
     {
         String[] parsedDob=Dob.split("-");
         int birthYear=Integer.parseInt(parsedDob[0]);
